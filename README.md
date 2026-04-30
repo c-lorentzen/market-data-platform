@@ -6,7 +6,7 @@ This repository currently contains the architectural foundations of a modular, d
 
 **In scope (Project 0):**
 - Repository structure, architectural layers, standards, and documentation
-- Interfaces/contracts for future modules (ingestion, storage, features, backtesting, ML, execution)
+- Interfaces/contracts for future modules (ingestion, storage, features, backtesting, ML, decision support, and optional execution)
 - Configuration, logging, and testing philosophy
 
 **Out of scope (Project 0):**

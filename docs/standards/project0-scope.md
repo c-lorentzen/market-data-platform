@@ -25,6 +25,7 @@ while ensuring testability, maintainability, and future expansion?
 - No machine learning models implemented
 - No backtesting engine implemented
 - No automated execution / live trading logic implemented
+- Execution logic is treated as an optional future extension. The primary system goal is probabilistic analysis, backtesting, scenario evaluation, and decision support.
 - No performance benchmarking of trading algorithms
 - No real MT5 integration or SQL integration beyond conceptual interfaces/stubs
 

@@ -1,4 +1,4 @@
-# Project 0 Charter — Foundations for a Modular Data-Driven Trading System
+# Project 0 Charter — Foundations for a Modular Data-Driven Financial Decision Support System
 
 ## 1. Project Overview
 Project 0 establishes the architectural foundations of a modular, scalable, and testable software system intended to support
@@ -75,4 +75,4 @@ Project 0 will be considered successful if:
 - Project 3: Feature engineering pipeline
 - Project 4: Backtesting engine integration
 - Project 5: ML experimentation and model lifecycle design
-- Project 6: Execution, monitoring, and risk controls
+- Project 6: Decision support, monitoring, and optional execution risk controls
