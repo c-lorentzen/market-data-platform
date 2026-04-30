@@ -23,7 +23,11 @@ market-data-platform/
 │     └─ standards-index.md
 ├─ src/
 │  └─ mdp/
-│     └─ __init__.py
+│     ├─ __init__.py
+│     └── database/
+│        ├── __init__.py
+│        └── connection.py
+│
 └─ tests/
    ├─ unit/
    ├─ integration/
