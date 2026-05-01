@@ -21,16 +21,25 @@ market-data-platform/
 │     ├─ architecture-overview.md
 │     ├─ dependency-rules.md
 │     └─ standards-index.md
+│
 ├─ scripts/
 │  ├── db_ping.py
-│  └── create_tables.py
+│  ├── create_tables.py
+│  ├── insert_sample_candles.py
+│  └── mt5_ping.py
+│
 ├─ src/
 │  └── mdp/
-│    └── database/
-│        ├── __init__.py
-│        ├── connection.py
-│        ├── schema.py
-│        └── candle_repository.py
+│     ├── database/
+│     │   ├── __init__.py
+│     │   ├── connection.py
+│     │   ├── schema.py
+│     │   ├── schema.py
+│     │   └── candle_repository.py
+│     │
+│     └── ingestion/
+│         ├── __init__.py
+│         └── mt5_connector.py
 │
 └─ tests/
    ├─ unit/

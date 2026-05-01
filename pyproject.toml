@@ -11,7 +11,8 @@ dependencies = [
     "pandas",
     "numpy",
     "python-dotenv",
-    "mysql-connector-python"
+    "mysql-connector-python",
+    "MetaTrader5"
 ]
 
 [tool.setuptools.packages.find]

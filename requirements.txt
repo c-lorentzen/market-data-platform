@@ -1,3 +1,5 @@
+-e git+https://github.com/c-lorentzen/market-data-platform.git@d142c1621fc7aee41cec6d1712bdb5920c113446#egg=market_data_platform
+metatrader5==5.0.5735
 mysql-connector-python==9.7.0
 numpy==2.4.4
 pandas==3.0.2
