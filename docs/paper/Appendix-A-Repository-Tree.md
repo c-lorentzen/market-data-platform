@@ -33,7 +33,8 @@ market-data-platform/
 │  ├── plot_market_candles.py
 │  ├── plot_market_close.py 
 │  ├── check_candle_quality.py
-│  └── build_basic_features.py
+│  ├── build_basic_features.py
+│  └── analyze_market_structure.py
 │
 ├─ src/
 │  └── mdp/
@@ -56,9 +57,13 @@ market-data-platform/
 │     │   ├── __init__.py
 │     │   └── candle_quality.py
 │     │ 
-│     └── features/
+│     ├── features/
+│     │   ├── __init__.py
+│     │   └── basic_features.py
+│     │
+│     └── structure/
 │         ├── __init__.py
-│         └── basic_features.py
+│         └── market_structure.py
 │
 └─ tests/
    ├─ unit/
