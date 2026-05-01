@@ -47,11 +47,28 @@ SELECT
     real_volume,
     source,
     created_at
-FROM market_candles
-WHERE symbol = %s
-  AND timeframe = %s
-ORDER BY timestamp_utc ASC
-LIMIT %s;
+FROM (
+    SELECT
+        id,
+        symbol,
+        timeframe,
+        timestamp_utc,
+        open_price,
+        high_price,
+        low_price,
+        close_price,
+        tick_volume,
+        spread,
+        real_volume,
+        source,
+        created_at
+    FROM market_candles
+    WHERE symbol = %s
+      AND timeframe = %s
+    ORDER BY timestamp_utc DESC
+    LIMIT %s
+) AS recent_candles
+ORDER BY timestamp_utc ASC;
 """
 
 

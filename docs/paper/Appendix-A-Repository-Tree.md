@@ -30,6 +30,7 @@ market-data-platform/
 │  ├── ingest_mt5_rates.py
 │  ├── fetch_step_index_rates.py
 │  ├── plot_step_index_close.py
+│  ├── plot_market_candles.py
 │  └── plot_market_close.py 
 │
 ├─ src/
