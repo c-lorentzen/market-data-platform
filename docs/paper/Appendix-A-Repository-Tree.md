@@ -31,7 +31,8 @@ market-data-platform/
 │  ├── fetch_step_index_rates.py
 │  ├── plot_step_index_close.py
 │  ├── plot_market_candles.py
-│  └── plot_market_close.py 
+│  ├── plot_market_close.py 
+│  └──check_candle_quality.py
 │
 ├─ src/
 │  └── mdp/
@@ -46,9 +47,13 @@ market-data-platform/
 │     │   ├── __init__.py
 │     │   └── mt5_connector.py
 │     │
-│     └── visualization/
+│     ├── visualization/
+│     │   ├── __init__.py
+│     │   └── price_charts.py
+│     │
+│     └── quality/
 │         ├── __init__.py
-│         └── price_charts.py
+│         └── candle_quality.py
 │
 └─ tests/
    ├─ unit/
