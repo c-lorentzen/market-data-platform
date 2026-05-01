@@ -21,12 +21,15 @@ market-data-platform/
 │     ├─ architecture-overview.md
 │     ├─ dependency-rules.md
 │     └─ standards-index.md
+├─ scripts/
+│  ├── db_ping.py
+│  └── create_tables.py
 ├─ src/
-│  └─ mdp/
-│     ├─ __init__.py
+│  └── mdp/
 │     └── database/
 │        ├── __init__.py
-│        └── connection.py
+│        ├── connection.py
+│        └── schema.py
 │
 └─ tests/
    ├─ unit/
