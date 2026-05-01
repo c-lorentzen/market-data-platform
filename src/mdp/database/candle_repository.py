@@ -110,3 +110,46 @@ def fetch_market_candles(symbol: str, timeframe: str, limit: int = 100) -> pd.Da
     connection.close()
 
     return pd.DataFrame(rows)
+
+def insert_market_candles_from_dataframe(candles_df: pd.DataFrame) -> int:
+    """
+    Converts a market candles DataFrame into database-ready records
+    and inserts or updates them in the market_candles table.
+    """
+    if candles_df.empty:
+        return 0
+
+    required_columns = [
+        "symbol",
+        "timeframe",
+        "timestamp_utc",
+        "open_price",
+        "high_price",
+        "low_price",
+        "close_price",
+        "tick_volume",
+        "spread",
+        "real_volume",
+        "source",
+    ]
+
+    missing_columns = [
+        column for column in required_columns if column not in candles_df.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(f"Missing required columns: {missing_columns}")
+
+    normalized_df = candles_df[required_columns].copy()
+
+    normalized_df["timestamp_utc"] = pd.to_datetime(
+        normalized_df["timestamp_utc"]
+    ).dt.to_pydatetime()
+
+    normalized_df["tick_volume"] = normalized_df["tick_volume"].astype(int)
+    normalized_df["spread"] = normalized_df["spread"].astype(int)
+    normalized_df["real_volume"] = normalized_df["real_volume"].astype(int)
+
+    candles = normalized_df.to_dict(orient="records")
+
+    return insert_market_candles(candles)

@@ -27,6 +27,7 @@ market-data-platform/
 │  ├── create_tables.py
 │  ├── insert_sample_candles.py
 │  ├── mt5_ping.py
+│  ├──ingest_mt5_rates.py
 │  └── fetch_step_index_rates.py
 │
 ├─ src/
