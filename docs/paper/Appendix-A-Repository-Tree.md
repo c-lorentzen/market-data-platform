@@ -29,7 +29,8 @@ market-data-platform/
 │  ├── mt5_ping.py
 │  ├── ingest_mt5_rates.py
 │  ├── fetch_step_index_rates.py
-│  └── plot_step_index_close.py
+│  ├── plot_step_index_close.py
+│  └── plot_market_close.py 
 │
 ├─ src/
 │  └── mdp/
