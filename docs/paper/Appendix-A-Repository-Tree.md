@@ -35,7 +35,8 @@ market-data-platform/
 │  ├── check_candle_quality.py
 │  ├── build_basic_features.py
 │  ├── analyze_market_structure.py
-│  └── analyze_multi_timeframe_structure.py
+│  ├── analyze_multi_timeframe_structure.py
+│  └──  inspect_timeframe_alignment.py
 │
 ├─ src/
 │  └── mdp/
@@ -62,9 +63,12 @@ market-data-platform/
 │     │   ├── __init__.py
 │     │   └── basic_features.py
 │     │
-│     └── structure/
+│     ├── structure/
+│     │   ├── __init__.py
+│     │   └── market_structure.py
+│     └── timeframes/
 │         ├── __init__.py
-│         └── market_structure.py
+│         └── alignment.py
 │
 └─ tests/
    ├─ unit/
