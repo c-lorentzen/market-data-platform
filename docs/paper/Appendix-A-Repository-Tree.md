@@ -26,10 +26,11 @@ market-data-platform/
 │  └── create_tables.py
 ├─ src/
 │  └── mdp/
-│     └── database/
+│    └── database/
 │        ├── __init__.py
 │        ├── connection.py
-│        └── schema.py
+│        ├── schema.py
+│        └── candle_repository.py
 │
 └─ tests/
    ├─ unit/
