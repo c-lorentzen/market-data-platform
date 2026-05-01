@@ -5,6 +5,125 @@ from dotenv import load_dotenv
 import MetaTrader5 as mt5
 import pandas as pd
 
+MT5_TIMEFRAMES = {
+    "M1": mt5.TIMEFRAME_M1,
+    "M5": mt5.TIMEFRAME_M5,
+    "M15": mt5.TIMEFRAME_M15,
+    "M30": mt5.TIMEFRAME_M30,
+    "H1": mt5.TIMEFRAME_H1,
+    "H4": mt5.TIMEFRAME_H4,
+    "D1": mt5.TIMEFRAME_D1,
+    "W1": mt5.TIMEFRAME_W1,
+}
+
+def resolve_timeframe(timeframe: str) -> int:
+    """
+    Converts a human-readable timeframe string into a MetaTrader 5 timeframe constant.
+    """
+    normalized_timeframe = timeframe.upper()
+
+    if normalized_timeframe not in MT5_TIMEFRAMES:
+        supported_timeframes = ", ".join(MT5_TIMEFRAMES.keys())
+        raise ValueError(
+            f"Unsupported timeframe: {timeframe}. "
+            f"Supported timeframes are: {supported_timeframes}"
+        )
+
+    return MT5_TIMEFRAMES[normalized_timeframe]
+
+def ensure_symbol_visible(symbol: str) -> None:
+    """
+    Ensures that a symbol is available and visible in the MT5 Market Watch.
+    """
+    symbol_info = mt5.symbol_info(symbol)
+
+    if symbol_info is None:
+        error_code, error_message = mt5.last_error()
+        raise RuntimeError(
+            f"Symbol not found in MT5: {symbol}. "
+            f"Error code: {error_code}. Message: {error_message}"
+        )
+
+    if not symbol_info.visible:
+        selected = mt5.symbol_select(symbol, True)
+
+        if not selected:
+            error_code, error_message = mt5.last_error()
+            raise RuntimeError(
+                f"Could not make symbol visible in Market Watch: {symbol}. "
+                f"Error code: {error_code}. Message: {error_message}"
+            )
+        
+def fetch_rates(
+    symbol: str,
+    timeframe: str,
+    count: int = 100,
+    start_pos: int = 0,
+) -> pd.DataFrame:
+    """
+    Fetches OHLCV candle data from MetaTrader 5 and returns a standardized DataFrame.
+
+    The returned DataFrame is aligned with the market_candles database schema.
+    """
+    if count <= 0:
+        raise ValueError("count must be greater than 0.")
+
+    ensure_symbol_visible(symbol)
+
+    mt5_timeframe = resolve_timeframe(timeframe)
+
+    rates = mt5.copy_rates_from_pos(
+        symbol,
+        mt5_timeframe,
+        start_pos,
+        count,
+    )
+
+    if rates is None:
+        error_code, error_message = mt5.last_error()
+        raise RuntimeError(
+            f"Could not fetch rates for {symbol} on {timeframe}. "
+            f"Error code: {error_code}. Message: {error_message}"
+        )
+
+    rates_df = pd.DataFrame(rates)
+
+    if rates_df.empty:
+        return rates_df
+
+    rates_df["timestamp_utc"] = (
+        pd.to_datetime(rates_df["time"], unit="s", utc=True)
+        .dt.tz_localize(None)
+    )
+
+    rates_df["symbol"] = symbol
+    rates_df["timeframe"] = timeframe.upper()
+    rates_df["source"] = "MT5"
+
+    rates_df = rates_df.rename(
+        columns={
+            "open": "open_price",
+            "high": "high_price",
+            "low": "low_price",
+            "close": "close_price",
+        }
+    )
+
+    ordered_columns = [
+        "symbol",
+        "timeframe",
+        "timestamp_utc",
+        "open_price",
+        "high_price",
+        "low_price",
+        "close_price",
+        "tick_volume",
+        "spread",
+        "real_volume",
+        "source",
+    ]
+
+    return rates_df[ordered_columns]
 
 def load_environment() -> None:
     """
