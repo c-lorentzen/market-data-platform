@@ -34,7 +34,8 @@ market-data-platform/
 │  ├── plot_market_close.py 
 │  ├── check_candle_quality.py
 │  ├── build_basic_features.py
-│  └── analyze_market_structure.py
+│  ├── analyze_market_structure.py
+│  └── analyze_multi_timeframe_structure.py
 │
 ├─ src/
 │  └── mdp/
