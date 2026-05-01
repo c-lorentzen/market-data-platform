@@ -36,7 +36,8 @@ market-data-platform/
 │  ├── build_basic_features.py
 │  ├── analyze_market_structure.py
 │  ├── analyze_multi_timeframe_structure.py
-│  └──  inspect_timeframe_alignment.py
+│  ├──  inspect_timeframe_alignment.py
+│  └── validate_timeframe_aggregation.py
 │
 ├─ src/
 │  └── mdp/

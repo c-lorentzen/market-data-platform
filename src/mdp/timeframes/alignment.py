@@ -111,3 +111,101 @@ def validate_child_timeframe_alignment(
         "first_child_timestamp": alignment_df["timestamp_utc"].min(),
         "last_child_timestamp": alignment_df["timestamp_utc"].max(),
     }
+
+def aggregate_child_candles(child_candles_df: pd.DataFrame) -> dict:
+    """
+    Aggregates lower-timeframe candles into one higher-timeframe OHLC summary.
+
+    Example:
+    12 M5 candles can be aggregated into one H1 candle.
+    """
+    if child_candles_df.empty:
+        return {
+            "open_price": None,
+            "high_price": None,
+            "low_price": None,
+            "close_price": None,
+            "tick_volume": None,
+            "child_count": 0,
+        }
+
+    aggregation_df = child_candles_df.copy()
+
+    aggregation_df["timestamp_utc"] = pd.to_datetime(
+        aggregation_df["timestamp_utc"]
+    )
+
+    price_columns = [
+        "open_price",
+        "high_price",
+        "low_price",
+        "close_price",
+    ]
+
+    for column in price_columns:
+        aggregation_df[column] = aggregation_df[column].astype(float)
+
+    if "tick_volume" in aggregation_df.columns:
+        aggregation_df["tick_volume"] = aggregation_df["tick_volume"].astype(int)
+
+    aggregation_df = aggregation_df.sort_values("timestamp_utc").reset_index(drop=True)
+
+    aggregated = {
+        "open_price": aggregation_df.iloc[0]["open_price"],
+        "high_price": aggregation_df["high_price"].max(),
+        "low_price": aggregation_df["low_price"].min(),
+        "close_price": aggregation_df.iloc[-1]["close_price"],
+        "tick_volume": (
+            int(aggregation_df["tick_volume"].sum())
+            if "tick_volume" in aggregation_df.columns
+            else None
+        ),
+        "child_count": len(aggregation_df),
+    }
+
+    return aggregated
+
+
+def compare_parent_to_child_aggregation(
+    parent_candle: dict,
+    child_candles_df: pd.DataFrame,
+    tolerance: float = 0.000001,
+) -> dict:
+    """
+    Compares a parent candle OHLC with the OHLC reconstructed from child candles.
+    """
+    aggregated_child = aggregate_child_candles(child_candles_df)
+
+    if aggregated_child["child_count"] == 0:
+        return {
+            "child_count": 0,
+            "is_ohlc_match": False,
+            "parent": parent_candle,
+            "aggregated_child": aggregated_child,
+            "differences": {},
+        }
+
+    parent_values = {
+        "open_price": float(parent_candle["open_price"]),
+        "high_price": float(parent_candle["high_price"]),
+        "low_price": float(parent_candle["low_price"]),
+        "close_price": float(parent_candle["close_price"]),
+    }
+
+    differences = {}
+
+    for key, parent_value in parent_values.items():
+        child_value = float(aggregated_child[key])
+        differences[key] = abs(parent_value - child_value)
+
+    is_ohlc_match = all(
+        difference <= tolerance for difference in differences.values()
+    )
+
+    return {
+        "child_count": aggregated_child["child_count"],
+        "is_ohlc_match": bool(is_ohlc_match),
+        "parent": parent_values,
+        "aggregated_child": aggregated_child,
+        "differences": differences,
+    }
