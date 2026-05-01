@@ -27,8 +27,9 @@ market-data-platform/
 │  ├── create_tables.py
 │  ├── insert_sample_candles.py
 │  ├── mt5_ping.py
-│  ├──ingest_mt5_rates.py
-│  └── fetch_step_index_rates.py
+│  ├── ingest_mt5_rates.py
+│  ├── fetch_step_index_rates.py
+│  └── plot_step_index_close.py
 │
 ├─ src/
 │  └── mdp/
@@ -39,9 +40,13 @@ market-data-platform/
 │     │   ├── schema.py
 │     │   └── candle_repository.py
 │     │
-│     └── ingestion/
+│     ├── ingestion/
+│     │   ├── __init__.py
+│     │   └── mt5_connector.py
+│     │
+│     └── visualization/
 │         ├── __init__.py
-│         └── mt5_connector.py
+│         └── price_charts.py
 │
 └─ tests/
    ├─ unit/

@@ -12,7 +12,8 @@ dependencies = [
     "numpy",
     "python-dotenv",
     "mysql-connector-python",
-    "MetaTrader5"
+    "MetaTrader5",
+    "matplotlib",
 ]
 
 [tool.setuptools.packages.find]

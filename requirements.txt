@@ -1,8 +1,16 @@
--e git+https://github.com/c-lorentzen/market-data-platform.git@d142c1621fc7aee41cec6d1712bdb5920c113446#egg=market_data_platform
+contourpy==1.3.3
+cycler==0.12.1
+fonttools==4.62.1
+kiwisolver==1.5.0
+-e git+https://github.com/c-lorentzen/market-data-platform.git@0b5ec41c38e48c973182cf9afbca6d2e102047dd#egg=market_data_platform
+matplotlib==3.10.9
 metatrader5==5.0.5735
 mysql-connector-python==9.7.0
 numpy==2.4.4
+packaging==26.2
 pandas==3.0.2
+pillow==12.2.0
+pyparsing==3.3.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 six==1.17.0
