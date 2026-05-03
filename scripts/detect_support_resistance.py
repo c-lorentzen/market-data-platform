@@ -64,6 +64,33 @@ def parse_arguments():
         help="Minimum touches required for a level to be returned.",
     )
 
+    parser.add_argument(
+        "--max-zone-width-points",
+        type=float,
+        default=None,
+        help="Optional maximum half-width of a zone in price points.",
+    )
+
+    parser.add_argument(
+        "--auto-zone-width",
+        action="store_true",
+        help="Automatically calculate zone width based on candle range.",
+    )
+
+    parser.add_argument(
+        "--zone-width-multiplier",
+        type=float,
+        default=0.75,
+        help="Multiplier applied to the median candle range when using auto zone width.",
+    )
+
+    parser.add_argument(
+        "--min-zone-width-points",
+        type=float,
+        default=None,
+        help="Optional minimum half-width of a zone in price points.",
+    )
+
     return parser.parse_args()
 
 
@@ -88,6 +115,10 @@ def main():
         right_window=args.right_window,
         tolerance_percent=args.tolerance_percent,
         min_touches=args.min_touches,
+        max_zone_width_points=args.max_zone_width_points,
+        auto_zone_width=args.auto_zone_width,
+        zone_width_multiplier=args.zone_width_multiplier,
+        min_zone_width_points=args.min_zone_width_points,
     )
 
     current_price = float(candles_df.iloc[-1]["close_price"])

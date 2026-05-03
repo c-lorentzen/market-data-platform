@@ -8,6 +8,49 @@ REQUIRED_SR_COLUMNS = [
     "close_price",
 ]
 
+def calculate_adaptive_zone_half_width(
+    candles_df: pd.DataFrame,
+    multiplier: float = 0.75,
+    min_zone_width_points: float | None = None,
+    max_zone_width_points: float | None = None,
+) -> float:
+    """
+    Calculates an adaptive support/resistance zone half-width based on
+    the median candle range of the selected market and timeframe.
+    """
+    if candles_df.empty:
+        raise ValueError("Cannot calculate adaptive zone width from an empty DataFrame.")
+
+    required_columns = ["high_price", "low_price"]
+
+    missing_columns = [
+        column for column in required_columns if column not in candles_df.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(
+            f"Missing required columns for adaptive zone width: {missing_columns}"
+        )
+
+    if multiplier <= 0:
+        raise ValueError("multiplier must be greater than 0.")
+
+    width_df = candles_df.copy()
+    width_df["high_price"] = width_df["high_price"].astype(float)
+    width_df["low_price"] = width_df["low_price"].astype(float)
+
+    candle_ranges = width_df["high_price"] - width_df["low_price"]
+    median_range = float(candle_ranges.median())
+
+    adaptive_half_width = median_range * multiplier
+
+    if min_zone_width_points is not None:
+        adaptive_half_width = max(adaptive_half_width, min_zone_width_points)
+
+    if max_zone_width_points is not None:
+        adaptive_half_width = min(adaptive_half_width, max_zone_width_points)
+
+    return adaptive_half_width
 
 def find_pivot_points(
     candles_df: pd.DataFrame,
@@ -97,6 +140,8 @@ def find_pivot_points(
 def cluster_price_levels(
     pivots_df: pd.DataFrame,
     tolerance_percent: float = 0.001,
+    max_zone_width_points: float | None = None,
+    fixed_zone_half_width_points: float | None = None,
 ) -> pd.DataFrame:
     """
     Groups nearby pivot prices into support/resistance zones.
@@ -188,13 +233,28 @@ def cluster_price_levels(
         levels_df["touch_count"] / total_touches
     )
 
-    levels_df["zone_low"] = (
-        levels_df["level_price"] * (1 - levels_df["tolerance_percent"])
+    percent_half_width = (
+        levels_df["level_price"] * levels_df["tolerance_percent"]
     )
 
-    levels_df["zone_high"] = (
-        levels_df["level_price"] * (1 + levels_df["tolerance_percent"])
-    )
+    if fixed_zone_half_width_points is not None:
+        if fixed_zone_half_width_points <= 0:
+            raise ValueError("fixed_zone_half_width_points must be greater than 0.")
+
+        half_width = fixed_zone_half_width_points
+
+    elif max_zone_width_points is not None:
+        if max_zone_width_points <= 0:
+            raise ValueError("max_zone_width_points must be greater than 0.")
+
+        half_width = percent_half_width.clip(upper=max_zone_width_points)
+
+    else:
+        half_width = percent_half_width
+
+    levels_df["zone_low"] = levels_df["level_price"] - half_width
+    levels_df["zone_high"] = levels_df["level_price"] + half_width
+    levels_df["zone_half_width"] = half_width
 
     levels_df = levels_df.sort_values(
         ["touch_count", "validation_score"],
@@ -210,6 +270,10 @@ def detect_support_resistance_zones(
     right_window: int = 3,
     tolerance_percent: float = 0.001,
     min_touches: int = 2,
+    max_zone_width_points: float | None = None,
+    auto_zone_width: bool = False,
+    zone_width_multiplier: float = 0.75,
+    min_zone_width_points: float | None = None,
 ) -> pd.DataFrame:
     """
     Detects support and resistance zones from historical candle data.
@@ -220,9 +284,21 @@ def detect_support_resistance_zones(
         right_window=right_window,
     )
 
+    fixed_zone_half_width_points = None
+
+    if auto_zone_width:
+        fixed_zone_half_width_points = calculate_adaptive_zone_half_width(
+            candles_df=candles_df,
+            multiplier=zone_width_multiplier,
+            min_zone_width_points=min_zone_width_points,
+            max_zone_width_points=max_zone_width_points,
+        )
+
     levels_df = cluster_price_levels(
         pivots_df=pivots_df,
         tolerance_percent=tolerance_percent,
+        max_zone_width_points=max_zone_width_points,
+        fixed_zone_half_width_points=fixed_zone_half_width_points,
     )
 
     if levels_df.empty:
