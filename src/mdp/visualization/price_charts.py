@@ -230,3 +230,146 @@ def plot_candlestick_with_levels(
 
     fig.savefig(output_path)
     plt.close(fig)
+
+def plot_candlestick_with_evaluated_levels(
+    candles_df: pd.DataFrame,
+    evaluated_levels_df: pd.DataFrame,
+    symbol: str,
+    timeframe: str,
+    output_path: str | Path,
+    max_levels: int = 10,
+) -> None:
+    """
+    Creates and saves a candlestick chart with support/resistance zones
+    and historical respect/break validation metrics.
+    """
+    if candles_df.empty:
+        raise ValueError("Cannot plot candlestick chart because the DataFrame is empty.")
+
+    if evaluated_levels_df.empty:
+        raise ValueError("Cannot plot evaluated levels because the DataFrame is empty.")
+
+    required_candle_columns = [
+        "timestamp_utc",
+        "open_price",
+        "high_price",
+        "low_price",
+        "close_price",
+    ]
+
+    missing_candle_columns = [
+        column for column in required_candle_columns
+        if column not in candles_df.columns
+    ]
+
+    if missing_candle_columns:
+        raise ValueError(
+            f"Missing required candle columns for plotting: {missing_candle_columns}"
+        )
+
+    required_level_columns = [
+        "level_type",
+        "level_price",
+        "zone_low",
+        "zone_high",
+        "tested_touches",
+        "respected_touches",
+        "broken_touches",
+        "respect_rate",
+        "break_rate",
+    ]
+
+    missing_level_columns = [
+        column for column in required_level_columns
+        if column not in evaluated_levels_df.columns
+    ]
+
+    if missing_level_columns:
+        raise ValueError(
+            f"Missing required evaluated level columns: {missing_level_columns}"
+        )
+
+    chart_df = candles_df[required_candle_columns].copy()
+
+    chart_df["timestamp_utc"] = pd.to_datetime(chart_df["timestamp_utc"])
+    chart_df["open_price"] = chart_df["open_price"].astype(float)
+    chart_df["high_price"] = chart_df["high_price"].astype(float)
+    chart_df["low_price"] = chart_df["low_price"].astype(float)
+    chart_df["close_price"] = chart_df["close_price"].astype(float)
+
+    chart_df = chart_df.rename(
+        columns={
+            "timestamp_utc": "Date",
+            "open_price": "Open",
+            "high_price": "High",
+            "low_price": "Low",
+            "close_price": "Close",
+        }
+    )
+
+    chart_df = chart_df.set_index("Date")
+
+    levels_to_plot = (
+        evaluated_levels_df.sort_values(
+            ["respect_rate", "tested_touches"],
+            ascending=False,
+            na_position="last",
+        )
+        .head(max_levels)
+        .copy()
+    )
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fig, axes = mpf.plot(
+        chart_df,
+        type="candle",
+        title=f"{symbol} Evaluated Support / Resistance Zones - {timeframe}",
+        ylabel="Price",
+        volume=False,
+        tight_layout=True,
+        returnfig=True,
+        warn_too_much_data=len(chart_df) + 1,
+    )
+
+    main_ax = axes[0]
+
+    for _, level in levels_to_plot.iterrows():
+        zone_low = float(level["zone_low"])
+        zone_high = float(level["zone_high"])
+        level_price = float(level["level_price"])
+        level_type = level["level_type"]
+
+        tested_touches = int(level["tested_touches"])
+        respected_touches = int(level["respected_touches"])
+        broken_touches = int(level["broken_touches"])
+
+        respect_rate = level["respect_rate"]
+        break_rate = level["break_rate"]
+
+        respect_text = "N/A" if pd.isna(respect_rate) else f"{respect_rate:.2f}"
+        break_text = "N/A" if pd.isna(break_rate) else f"{break_rate:.2f}"
+
+        main_ax.axhspan(
+            zone_low,
+            zone_high,
+            alpha=0.12,
+        )
+
+        label = (
+            f"{level_type} | tested: {tested_touches} | "
+            f"respect: {respect_text} | break: {break_text}"
+        )
+
+        main_ax.text(
+            0.01,
+            level_price,
+            label,
+            transform=main_ax.get_yaxis_transform(),
+            fontsize=8,
+            verticalalignment="center",
+        )
+
+    fig.savefig(output_path)
+    plt.close(fig)
