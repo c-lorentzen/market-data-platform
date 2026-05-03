@@ -39,6 +39,7 @@ market-data-platform/
 │  ├──  inspect_timeframe_alignment.py
 │  ├── validate_timeframe_aggregation.py
 │  ├── validate_timeframe_aggregation_batch.py
+│  ├── plot_market_levels.py
 │  └── detect_support_resistance.py
 │
 ├─ src/

@@ -188,6 +188,14 @@ def cluster_price_levels(
         levels_df["touch_count"] / total_touches
     )
 
+    levels_df["zone_low"] = (
+        levels_df["level_price"] * (1 - levels_df["tolerance_percent"])
+    )
+
+    levels_df["zone_high"] = (
+        levels_df["level_price"] * (1 + levels_df["tolerance_percent"])
+    )
+
     levels_df = levels_df.sort_values(
         ["touch_count", "validation_score"],
         ascending=False,
