@@ -38,7 +38,8 @@ market-data-platform/
 │  ├── analyze_multi_timeframe_structure.py
 │  ├──  inspect_timeframe_alignment.py
 │  ├── validate_timeframe_aggregation.py
-│  └── validate_timeframe_aggregation_batch.py
+│  ├── validate_timeframe_aggregation_batch.py
+│  └── detect_support_resistance.py
 │
 ├─ src/
 │  └── mdp/
@@ -67,7 +68,9 @@ market-data-platform/
 │     │
 │     ├── structure/
 │     │   ├── __init__.py
-│     │   └── market_structure.py
+│     │   ├── market_structure.py
+│     │   └── support_resistance.py
+│     │
 │     └── timeframes/
 │         ├── __init__.py
 │         └── alignment.py
