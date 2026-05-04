@@ -77,9 +77,10 @@ market-data-platform/
 │     │   └── zone_context.py
 │     │
 │     └── timeframes/
-│         ├── __init__.py
-│         └── alignment.py
-│
+│        ├── __init__.py
+│        ├── alignment.py
+│        └── registry.py
+│       
 └─ tests/
    ├─ unit/
    ├─ integration/

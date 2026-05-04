@@ -1,45 +1,64 @@
 import pandas as pd
 
-
-TIMEFRAME_TO_TIMEDELTA = {
-    "M1": pd.Timedelta(minutes=1),
-    "M2": pd.Timedelta(minutes=2),
-    "M3": pd.Timedelta(minutes=3),
-    "M4": pd.Timedelta(minutes=4),
-    "M5": pd.Timedelta(minutes=5),
-    "M6": pd.Timedelta(minutes=6),
-    "M10": pd.Timedelta(minutes=10),
-    "M12": pd.Timedelta(minutes=12),
-    "M15": pd.Timedelta(minutes=15),
-    "M20": pd.Timedelta(minutes=20),
-    "M30": pd.Timedelta(minutes=30),
-    "H1": pd.Timedelta(hours=1),
-    "H2": pd.Timedelta(hours=2),
-    "H3": pd.Timedelta(hours=3),
-    "H4": pd.Timedelta(hours=4),
-    "H6": pd.Timedelta(hours=6),
-    "H8": pd.Timedelta(hours=8),
-    "H12": pd.Timedelta(hours=12),
-    "D1": pd.Timedelta(days=1),
-    "W1": pd.Timedelta(weeks=1),
-}
+from mdp.timeframes.registry import (
+    build_time_window,
+    get_timeframe_delta,
+    is_calendar_timeframe,
+    validate_timeframe,
+)
 
 
-def get_expected_time_delta(timeframe: str) -> pd.Timedelta:
+def get_expected_time_delta(timeframe: str):
     """
-    Returns the expected time difference between consecutive candles.
-    """
-    normalized_timeframe = timeframe.upper()
+    Backward-compatible helper that returns the expected timeframe duration.
 
-    if normalized_timeframe not in TIMEFRAME_TO_TIMEDELTA:
-        supported_timeframes = ", ".join(TIMEFRAME_TO_TIMEDELTA.keys())
-        raise ValueError(
-            f"Unsupported timeframe for quality checks: {timeframe}. "
-            f"Supported timeframes are: {supported_timeframes}"
+    Fixed timeframes return pd.Timedelta.
+    Calendar timeframes such as MN1 return pd.DateOffset.
+    """
+    return get_timeframe_delta(timeframe)
+
+
+def count_time_gaps(
+    timestamps: pd.Series,
+    timeframe: str,
+) -> tuple[int, str | None]:
+    """
+    Counts gaps between consecutive candles for both fixed and calendar timeframes.
+    """
+    normalized_timeframe = validate_timeframe(timeframe)
+
+    sorted_timestamps = (
+        pd.to_datetime(timestamps)
+        .sort_values()
+        .reset_index(drop=True)
+    )
+
+    if len(sorted_timestamps) <= 1:
+        return 0, None
+
+    gap_count = 0
+    largest_gap = None
+
+    for index in range(len(sorted_timestamps) - 1):
+        current_time = sorted_timestamps.iloc[index]
+        next_time = sorted_timestamps.iloc[index + 1]
+
+        _, expected_next_time = build_time_window(
+            start_time=current_time,
+            timeframe=normalized_timeframe,
         )
 
-    return TIMEFRAME_TO_TIMEDELTA[normalized_timeframe]
+        if next_time != expected_next_time:
+            gap_count += 1
 
+            actual_gap = next_time - current_time
+
+            if largest_gap is None or actual_gap > largest_gap:
+                largest_gap = actual_gap
+
+    largest_gap_text = None if largest_gap is None else str(largest_gap)
+
+    return gap_count, largest_gap_text
 
 def validate_candle_quality(
     candles_df: pd.DataFrame,
@@ -110,16 +129,10 @@ def validate_candle_quality(
         | (quality_df["close_price"] < quality_df["low_price"])
     ).sum()
 
-    expected_delta = get_expected_time_delta(timeframe)
-
-    time_differences = quality_df["timestamp_utc"].diff().dropna()
-
-    gaps = time_differences[time_differences > expected_delta]
-
-    largest_gap = None
-
-    if not gaps.empty:
-        largest_gap = str(gaps.max())
+    gap_count, largest_gap = count_time_gaps(
+        timestamps=quality_df["timestamp_utc"],
+        timeframe=timeframe,
+    )
 
     return {
         "symbol": symbol,
@@ -130,6 +143,6 @@ def validate_candle_quality(
         "duplicate_timestamps": int(duplicate_timestamps),
         "missing_values": missing_values,
         "invalid_ohlc_rows": int(invalid_ohlc_rows),
-        "gap_count": int(len(gaps)),
+        "gap_count": int(gap_count),
         "largest_gap": largest_gap,
     }

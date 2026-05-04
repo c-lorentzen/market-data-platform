@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 import MetaTrader5 as mt5
 import pandas as pd
 
+from mdp.timeframes.registry import validate_timeframe
+from datetime import timezone
+
 MT5_TIMEFRAMES = {
     "M1": mt5.TIMEFRAME_M1,
     "M2": mt5.TIMEFRAME_M2,
@@ -33,13 +36,13 @@ def resolve_timeframe(timeframe: str) -> int:
     """
     Converts a human-readable timeframe string into a MetaTrader 5 timeframe constant.
     """
-    normalized_timeframe = timeframe.upper()
+    normalized_timeframe = validate_timeframe(timeframe)
 
     if normalized_timeframe not in MT5_TIMEFRAMES:
         supported_timeframes = ", ".join(MT5_TIMEFRAMES.keys())
         raise ValueError(
-            f"Unsupported timeframe: {timeframe}. "
-            f"Supported timeframes are: {supported_timeframes}"
+            f"Timeframe is supported by the project but not mapped in MT5 connector: "
+            f"{timeframe}. MT5 mapped timeframes are: {supported_timeframes}"
         )
 
     return MT5_TIMEFRAMES[normalized_timeframe]
@@ -99,44 +102,11 @@ def fetch_rates(
             f"Error code: {error_code}. Message: {error_message}"
         )
 
-    rates_df = pd.DataFrame(rates)
-
-    if rates_df.empty:
-        return rates_df
-
-    rates_df["timestamp_utc"] = (
-        pd.to_datetime(rates_df["time"], unit="s", utc=True)
-        .dt.tz_localize(None)
+    return standardize_rates_dataframe(
+        rates=rates,
+        symbol=symbol,
+        timeframe=timeframe,
     )
-
-    rates_df["symbol"] = symbol
-    rates_df["timeframe"] = timeframe.upper()
-    rates_df["source"] = "MT5"
-
-    rates_df = rates_df.rename(
-        columns={
-            "open": "open_price",
-            "high": "high_price",
-            "low": "low_price",
-            "close": "close_price",
-        }
-    )
-
-    ordered_columns = [
-        "symbol",
-        "timeframe",
-        "timestamp_utc",
-        "open_price",
-        "high_price",
-        "low_price",
-        "close_price",
-        "tick_volume",
-        "spread",
-        "real_volume",
-        "source",
-    ]
-
-    return rates_df[ordered_columns]
 
 def load_environment() -> None:
     """
@@ -231,3 +201,115 @@ def get_visible_symbols() -> pd.DataFrame:
     ]
 
     return pd.DataFrame(symbol_rows)
+
+def _to_utc_datetime(value):
+    """
+    Converts a datetime-like value into a timezone-aware UTC datetime object.
+    """
+    timestamp = pd.to_datetime(value)
+
+    if timestamp.tzinfo is None:
+        timestamp = timestamp.tz_localize("UTC")
+    else:
+        timestamp = timestamp.tz_convert("UTC")
+
+    return timestamp.to_pydatetime()
+
+
+def standardize_rates_dataframe(
+    rates,
+    symbol: str,
+    timeframe: str,
+) -> pd.DataFrame:
+    """
+    Converts raw MT5 rates into the standard market_candles DataFrame format.
+    """
+    rates_df = pd.DataFrame(rates)
+
+    if rates_df.empty:
+        return rates_df
+
+    rates_df["timestamp_utc"] = (
+        pd.to_datetime(rates_df["time"], unit="s", utc=True)
+        .dt.tz_localize(None)
+    )
+
+    rates_df["symbol"] = symbol
+    rates_df["timeframe"] = timeframe.upper()
+    rates_df["source"] = "MT5"
+
+    rates_df = rates_df.rename(
+        columns={
+            "open": "open_price",
+            "high": "high_price",
+            "low": "low_price",
+            "close": "close_price",
+        }
+    )
+
+    ordered_columns = [
+        "symbol",
+        "timeframe",
+        "timestamp_utc",
+        "open_price",
+        "high_price",
+        "low_price",
+        "close_price",
+        "tick_volume",
+        "spread",
+        "real_volume",
+        "source",
+    ]
+
+    return rates_df[ordered_columns]
+
+
+def fetch_rates_between(
+    symbol: str,
+    timeframe: str,
+    start_time,
+    end_time,
+) -> pd.DataFrame:
+    """
+    Fetches OHLCV candle data from MetaTrader 5 between two UTC datetimes.
+    """
+    ensure_symbol_visible(symbol)
+
+    mt5_timeframe = resolve_timeframe(timeframe)
+
+    utc_start = _to_utc_datetime(start_time)
+    utc_end = _to_utc_datetime(end_time)
+
+    rates = mt5.copy_rates_range(
+        symbol,
+        mt5_timeframe,
+        utc_start,
+        utc_end,
+    )
+
+    if rates is None:
+        error_code, error_message = mt5.last_error()
+        raise RuntimeError(
+            f"Could not fetch rates for {symbol} on {timeframe} "
+            f"between {start_time} and {end_time}. "
+            f"Error code: {error_code}. Message: {error_message}"
+        )
+
+    rates_df = standardize_rates_dataframe(
+        rates=rates,
+        symbol=symbol,
+        timeframe=timeframe,
+    )
+
+    if rates_df.empty:
+        return rates_df
+
+    start_timestamp = pd.to_datetime(start_time).tz_localize(None)
+    end_timestamp = pd.to_datetime(end_time).tz_localize(None)
+
+    rates_df = rates_df[
+        (rates_df["timestamp_utc"] >= start_timestamp)
+        & (rates_df["timestamp_utc"] < end_timestamp)
+    ].copy()
+
+    return rates_df.reset_index(drop=True)

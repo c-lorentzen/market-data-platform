@@ -1,6 +1,9 @@
 import pandas as pd
 
-from mdp.quality.candle_quality import get_expected_time_delta
+from mdp.timeframes.registry import (
+    build_time_window,
+    get_expected_child_candle_count as registry_get_expected_child_candle_count,
+)
 
 
 def build_parent_time_window(
@@ -9,38 +12,28 @@ def build_parent_time_window(
 ) -> tuple[pd.Timestamp, pd.Timestamp]:
     """
     Builds the start and end time window for a parent candle.
-
-    Example:
-    H1 candle at 20:00 covers:
-    20:00 <= child candles < 21:00
     """
-    start_time = pd.to_datetime(parent_start_time)
-    parent_delta = get_expected_time_delta(parent_timeframe)
-    end_time = start_time + parent_delta
-
-    return start_time, end_time
+    return build_time_window(
+        start_time=parent_start_time,
+        timeframe=parent_timeframe,
+    )
 
 
 def get_expected_child_candle_count(
     parent_timeframe: str,
     child_timeframe: str,
+    parent_start_time=None,
 ) -> int | None:
     """
     Calculates how many child candles should fit inside one parent candle.
 
-    Example:
-    H1 / M5 = 12
-    H1 / M1 = 60
-    H1 / M15 = 4
+    Supports fixed timeframes and calendar-aware parent timeframes like MN1.
     """
-    parent_delta = get_expected_time_delta(parent_timeframe)
-    child_delta = get_expected_time_delta(child_timeframe)
-
-    if parent_delta.value % child_delta.value != 0:
-        return None
-
-    return parent_delta.value // child_delta.value
-
+    return registry_get_expected_child_candle_count(
+        parent_timeframe=parent_timeframe,
+        child_timeframe=child_timeframe,
+        parent_start_time=parent_start_time,
+    )
 
 def validate_child_timeframe_alignment(
     child_candles_df: pd.DataFrame,
@@ -59,6 +52,7 @@ def validate_child_timeframe_alignment(
     expected_count = get_expected_child_candle_count(
         parent_timeframe=parent_timeframe,
         child_timeframe=child_timeframe,
+        parent_start_time=parent_start_time,
     )
 
     if child_candles_df.empty:
