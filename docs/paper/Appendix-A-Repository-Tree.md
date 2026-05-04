@@ -41,7 +41,8 @@ market-data-platform/
 │  ├── validate_timeframe_aggregation_batch.py
 │  ├── plot_market_levels.py
 │  ├── detect_support_resistance.py
-│  └── evaluate_support_resistance.py
+│  ├── evaluate_support_resistance.py
+│  └── analyze_zone_context.py
 │
 ├─ src/
 │  └── mdp/
@@ -72,7 +73,8 @@ market-data-platform/
 │     │   ├── __init__.py
 │     │   ├── market_structure.py
 │     │   ├── support_resistance.py
-│     │   └── zone_validation.py
+│     │   ├── zone_validation.py
+│     │   └── zone_context.py
 │     │
 │     └── timeframes/
 │         ├── __init__.py
