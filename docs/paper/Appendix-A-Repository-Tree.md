@@ -42,7 +42,8 @@ market-data-platform/
 │  ├── plot_market_levels.py
 │  ├── detect_support_resistance.py
 │  ├── evaluate_support_resistance.py
-│  └── analyze_zone_context.py
+│  ├── analyze_zone_context.py
+│  └── test_candle_loader.py
 │
 ├─ src/
 │  └── mdp/
@@ -51,7 +52,8 @@ market-data-platform/
 │     │   ├── connection.py
 │     │   ├── schema.py
 │     │   ├── schema.py
-│     │   └── candle_repository.py
+│     │   ├── candle_repository.py
+│     │   └── candle_loader.py
 │     │
 │     ├── ingestion/
 │     │   ├── __init__.py
@@ -76,10 +78,14 @@ market-data-platform/
 │     │   ├── zone_validation.py
 │     │   └── zone_context.py
 │     │
-│     └── timeframes/
-│        ├── __init__.py
-│        ├── alignment.py
-│        └── registry.py
+│     ├── timeframes/
+│     │   ├── __init__.py
+│     │   ├── alignment.py
+│     │   └── registry.py
+│     │
+│     └── utils/
+│         ├── __init__.py
+│         └── date_ranges.py
 │       
 └─ tests/
    ├─ unit/
