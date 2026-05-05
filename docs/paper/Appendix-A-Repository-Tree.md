@@ -43,7 +43,8 @@ market-data-platform/
 │  ├── detect_support_resistance.py
 │  ├── evaluate_support_resistance.py
 │  ├── analyze_zone_context.py
-│  └── test_candle_loader.py
+│  ├── test_candle_loader.py
+│  └── walk_forward_sr_bounce.py
 │
 ├─ src/
 │  └── mdp/
@@ -83,9 +84,14 @@ market-data-platform/
 │     │   ├── alignment.py
 │     │   └── registry.py
 │     │
-│     └── utils/
+│     ├── utils/
+│     │   ├── __init__.py
+│     │   └── date_ranges.py
+│     │
+│     └── backtesting/
 │         ├── __init__.py
-│         └── date_ranges.py
+│         ├── engine.py
+│         └── walk_forward.py
 │       
 └─ tests/
    ├─ unit/
