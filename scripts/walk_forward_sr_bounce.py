@@ -1,3 +1,7 @@
+from pathlib import Path
+
+from mdp.reporting.walk_forward_exports import save_walk_forward_outputs
+
 import argparse
 
 import pandas as pd
@@ -66,6 +70,18 @@ def parse_arguments():
         "--allow-overlapping-trades",
         action="store_true",
         help="Allow overlapping trades during the walk-forward test.",
+    )
+
+    parser.add_argument(
+        "--save-results",
+        action="store_true",
+        help="Save walk-forward outputs to CSV and JSON files.",
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        default=None,
+        help="Optional output folder for walk-forward reports.",
     )
 
     return parser.parse_args()
@@ -161,6 +177,23 @@ def build_sr_bounce_signals_for_window(
 
     return signals_df, diagnostics
 
+def build_default_output_dir(symbol: str, timeframe: str) -> Path:
+    """
+    Builds the default folder path for walk-forward report files.
+    """
+    # Make the symbol safe for folder names.
+    clean_symbol = symbol.lower().replace(" ", "_")
+
+    # Make the timeframe safe for folder names.
+    clean_timeframe = timeframe.lower()
+
+    # Store walk-forward reports under outputs/reports.
+    return (
+        Path("outputs")
+        / "reports"
+        / "walk_forward"
+        / f"{clean_symbol}_{clean_timeframe}_sr_bounce"
+    )
 
 def main():
     args = parse_arguments()
@@ -247,6 +280,61 @@ def main():
 
     print("\nTrades:")
     print(trades_df)
+
+    if args.save_results:
+        # Use the user-selected output folder if provided.
+        if args.output_dir is not None:
+            output_dir = Path(args.output_dir)
+
+        # Otherwise, use a default clean project folder.
+        else:
+            output_dir = build_default_output_dir(
+                symbol=symbol,
+                timeframe=timeframe,
+            )
+
+        # Store the most important run settings for reproducibility.
+        config = {
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "limit": args.limit,
+            "start_time": args.start_time,
+            "end_time": args.end_time,
+            "lookback_days": args.lookback_days,
+            "lookback_weeks": args.lookback_weeks,
+            "lookback_months": args.lookback_months,
+            "train_window_candles": args.train_window_candles,
+            "test_window_candles": args.test_window_candles,
+            "step_size_candles": args.step_size_candles,
+            "left_window": args.left_window,
+            "right_window": args.right_window,
+            "tolerance_percent": args.tolerance_percent,
+            "min_touches": args.min_touches,
+            "reaction_window": args.reaction_window,
+            "cooldown": args.cooldown,
+            "auto_zone_width": args.auto_zone_width,
+            "zone_width_multiplier": args.zone_width_multiplier,
+            "min_zone_width_points": args.min_zone_width_points,
+            "max_zone_width_points": args.max_zone_width_points,
+            "min_respect_rate": args.min_respect_rate,
+            "reward_risk_ratio": args.reward_risk_ratio,
+            "min_risk_points": args.min_risk_points,
+            "max_holding_candles": args.max_holding_candles,
+            "confirmation_mode": args.confirmation_mode,
+            "allow_overlapping_trades": args.allow_overlapping_trades,
+        }
+
+        # Save windows, signals, trades, summary, and configuration.
+        save_walk_forward_outputs(
+            output_dir=output_dir,
+            windows_df=windows_df,
+            signals_df=signals_df,
+            trades_df=trades_df,
+            summary=summary,
+            config=config,
+        )
+
+        print(f"\nSaved walk-forward report files to: {output_dir}")
 
 
 if __name__ == "__main__":
