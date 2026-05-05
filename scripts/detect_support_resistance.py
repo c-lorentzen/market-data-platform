@@ -2,7 +2,7 @@ import argparse
 
 import pandas as pd
 
-from mdp.database.candle_repository import fetch_market_candles
+from mdp.database.candle_loader import load_market_candles
 from mdp.structure.support_resistance import (
     detect_support_resistance_zones,
     find_nearest_levels,
@@ -34,6 +34,39 @@ def parse_arguments():
         type=int,
         default=300,
         help="Number of recent candles to analyze.",
+    )
+
+    parser.add_argument(
+        "--start-time",
+        default=None,
+        help='Start datetime, for example: "2026-05-04 21:00:00".',
+    )
+
+    parser.add_argument(
+        "--end-time",
+        default=None,
+        help='End datetime, for example: "2026-05-04 22:00:00".',
+    )
+
+    parser.add_argument(
+        "--lookback-days",
+        type=int,
+        default=None,
+        help="Calendar lookback in days.",
+    )
+
+    parser.add_argument(
+        "--lookback-weeks",
+        type=int,
+        default=None,
+        help="Calendar lookback in weeks.",
+    )
+
+    parser.add_argument(
+        "--lookback-months",
+        type=int,
+        default=None,
+        help="Calendar-aware lookback in months.",
     )
 
     parser.add_argument(
@@ -100,10 +133,15 @@ def main():
     symbol = args.symbol
     timeframe = args.timeframe.upper()
 
-    candles_df = fetch_market_candles(
+    candles_df = load_market_candles(
         symbol=symbol,
         timeframe=timeframe,
         limit=args.limit,
+        start_time=args.start_time,
+        end_time=args.end_time,
+        lookback_days=args.lookback_days,
+        lookback_weeks=args.lookback_weeks,
+        lookback_months=args.lookback_months,
     )
 
     if candles_df.empty:

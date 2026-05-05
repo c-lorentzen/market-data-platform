@@ -35,7 +35,7 @@ def parse_arguments():
         help="Number of recent candles to analyze.",
     )
 
-        parser.add_argument(
+    parser.add_argument(
         "--start-time",
         default=None,
         help='Start datetime, for example: "2026-05-04 21:00:00".',
