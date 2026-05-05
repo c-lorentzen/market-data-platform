@@ -44,7 +44,8 @@ market-data-platform/
 │  ├── evaluate_support_resistance.py
 │  ├── analyze_zone_context.py
 │  ├── test_candle_loader.py
-│  └── walk_forward_sr_bounce.py
+│  ├── walk_forward_sr_bounce.py
+│  └── generate_walk_forward_pdf_report.py
 │
 ├─ src/
 │  └── mdp/
@@ -96,7 +97,9 @@ market-data-platform/
 │     │
 │     └── reporting/
 │         ├── __init__.py
-│         └── walk_forward_exports.py
+│         ├── walk_forward_exports.py
+│         ├── performance_charts.py
+│         └── pdf_report.py
 │       
 └─ tests/
    ├─ unit/

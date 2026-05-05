@@ -15,6 +15,7 @@ dependencies = [
     "MetaTrader5",
     "matplotlib",
     "mplfinance",
+    "reportlab",
 ]
 
 [tool.setuptools.packages.find]
