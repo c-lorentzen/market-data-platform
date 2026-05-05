@@ -91,7 +91,8 @@ market-data-platform/
 │     ├── backtesting/
 │     │   ├── __init__.py
 │     │   ├── engine.py
-│     │   └── walk_forward.py
+│     │   ├── walk_forward.py
+│     │   └── performance.py
 │     │
 │     └── reporting/
 │         ├── __init__.py

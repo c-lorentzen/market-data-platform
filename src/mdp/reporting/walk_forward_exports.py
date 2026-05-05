@@ -11,6 +11,9 @@ def save_walk_forward_outputs(
     trades_df: pd.DataFrame,
     summary: dict,
     config: dict,
+    performance_summary: dict | None = None,
+    equity_curve_df: pd.DataFrame | None = None,
+    trade_distribution_df: pd.DataFrame | None = None,
 ) -> None:
     """
     Saves walk-forward backtest outputs into CSV and JSON files.
@@ -52,4 +55,25 @@ def save_walk_forward_outputs(
             config_file,
             indent=4,
             default=str,
+        )
+    
+        # Save professional performance metrics if they were provided.
+    if performance_summary is not None:
+        pd.DataFrame([performance_summary]).to_csv(
+            output_dir / "performance_summary.csv",
+            index=False,
+        )
+
+    # Save the equity curve if it was provided.
+    if equity_curve_df is not None:
+        equity_curve_df.to_csv(
+            output_dir / "equity_curve.csv",
+            index=False,
+        )
+
+    # Save the trade distribution if it was provided.
+    if trade_distribution_df is not None:
+        trade_distribution_df.to_csv(
+            output_dir / "trade_distribution.csv",
+            index=False,
         )

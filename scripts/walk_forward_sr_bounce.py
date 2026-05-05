@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from mdp.backtesting.performance import build_performance_report
+
 from mdp.reporting.walk_forward_exports import save_walk_forward_outputs
 
 import argparse
@@ -256,6 +258,16 @@ def main():
         windows_df=windows_df,
     )
 
+    # Build professional performance metrics from walk-forward trades.
+    performance_report = build_performance_report(trades_df)
+
+    # Extract the performance summary for terminal output and export.
+    performance_summary = performance_report["performance_summary"]
+
+    # Extract equity curve and trade distribution tables for export.
+    equity_curve_df = performance_report["equity_curve_df"]
+    trade_distribution_df = performance_report["trade_distribution_df"]
+
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", 240)
 
@@ -271,6 +283,16 @@ def main():
     print("\nWalk-forward summary:")
     for key, value in summary.items():
         print(f"- {key}: {value}")
+
+    print("\nPerformance summary:")
+    for key, value in performance_summary.items():
+        print(f"- {key}: {value}")
+
+    print("\nEquity curve:")
+    print(equity_curve_df)
+
+    print("\nTrade distribution:")
+    print(trade_distribution_df)
 
     print("\nWindow diagnostics:")
     print(windows_df)
@@ -324,7 +346,7 @@ def main():
             "allow_overlapping_trades": args.allow_overlapping_trades,
         }
 
-        # Save windows, signals, trades, summary, and configuration.
+        # Save walk-forward results and professional performance metrics.
         save_walk_forward_outputs(
             output_dir=output_dir,
             windows_df=windows_df,
@@ -332,6 +354,9 @@ def main():
             trades_df=trades_df,
             summary=summary,
             config=config,
+            performance_summary=performance_summary,
+            equity_curve_df=equity_curve_df,
+            trade_distribution_df=trade_distribution_df,
         )
 
         print(f"\nSaved walk-forward report files to: {output_dir}")
