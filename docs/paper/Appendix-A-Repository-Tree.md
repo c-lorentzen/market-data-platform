@@ -46,7 +46,8 @@ market-data-platform/
 │  ├── test_candle_loader.py
 │  ├── walk_forward_sr_bounce.py
 │  ├── generate_walk_forward_pdf_report.py
-│  └── detect_trend_channels.py
+│  ├── detect_trend_channels.py
+│  └── plot_trend_channels
 │
 ├─ src/
 │  └── mdp/
@@ -64,7 +65,8 @@ market-data-platform/
 │     │
 │     ├── visualization/
 │     │   ├── __init__.py
-│     │   └── price_charts.py
+│     │   ├── price_charts.py
+│     │   └── trend_channel_charts
 │     │
 │     ├── quality/
 │     │   ├── __init__.py

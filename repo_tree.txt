@@ -3,9 +3,11 @@ Volume serial number is CC50-B06E
 D:.
 |   .env
 |   .gitignore
+|   docs.zip
 |   LICENSE
 |   market-data-platform-code.zip
 |   notes.txt
+|   PROJECT_STATE.md
 |   pyproject.toml
 |   README.md
 |   repo_tree.txt
