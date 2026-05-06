@@ -45,7 +45,8 @@ market-data-platform/
 │  ├── analyze_zone_context.py
 │  ├── test_candle_loader.py
 │  ├── walk_forward_sr_bounce.py
-│  └── generate_walk_forward_pdf_report.py
+│  ├── generate_walk_forward_pdf_report.py
+│  └── detect_trend_channels.py
 │
 ├─ src/
 │  └── mdp/
@@ -78,7 +79,8 @@ market-data-platform/
 │     │   ├── market_structure.py
 │     │   ├── support_resistance.py
 │     │   ├── zone_validation.py
-│     │   └── zone_context.py
+│     │   ├── zone_context.py
+│     │   └── trend_channels.py
 │     │
 │     ├── timeframes/
 │     │   ├── __init__.py
