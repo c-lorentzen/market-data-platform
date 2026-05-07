@@ -41,6 +41,11 @@ def parse_arguments():
         help="Optional historical cutoff timestamp. Only candles at or before this time are used.",
     )
     parser.add_argument(
+        "--include-forming-candle",
+        action="store_true",
+        help="Allow the candle currently forming at --end-time. Default uses only fully closed candles.",
+    )
+    parser.add_argument(
         "--step-size",
         type=int,
         default=20,
@@ -241,6 +246,7 @@ def main():
         recent_window=args.recent_window,
         atr_window=args.atr_window,
         end_time=args.end_time,
+        closed_candles_only=not args.include_forming_candle,
     )
 
     # Build a compact alignment summary for macro-to-micro interpretation.
@@ -258,6 +264,7 @@ def main():
     print(f"Recent window override: {args.recent_window}")
     print(f"ATR window override: {args.atr_window}")
     print(f"Analysis cutoff: {args.end_time}")
+    print(f"Closed candles only: {not args.include_forming_candle}")
 
     print_alignment_report(alignment_summary)
     print_summary_table(summary_df)

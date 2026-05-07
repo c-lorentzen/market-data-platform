@@ -429,6 +429,7 @@ def build_trend_channel_trade_plan(
     continuation_multiplier: float = 2.0,
     minimum_rr: float = 1.50,
     end_time: str | None = None,
+    closed_candles_only: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Runs event detection and converts the result into a scale-aware trade plan.
@@ -450,6 +451,7 @@ def build_trend_channel_trade_plan(
         continuation_multiplier=continuation_multiplier,
         minimum_rr=minimum_rr,
         end_time=end_time,
+        closed_candles_only=closed_candles_only,
     )
 
     # Build the trade plan only after the event module has created its event row.

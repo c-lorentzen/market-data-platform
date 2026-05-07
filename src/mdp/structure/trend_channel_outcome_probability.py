@@ -472,6 +472,7 @@ def estimate_trend_channel_outcome_probability(
     rr_decay: float = 0.45,
     stop_bias_multiplier: float = 1.25,
     end_time: str | None = None,
+    closed_candles_only: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Builds a trade plan and estimates probability proxies for its available targets.
@@ -493,6 +494,7 @@ def estimate_trend_channel_outcome_probability(
         continuation_multiplier=continuation_multiplier,
         minimum_rr=minimum_rr,
         end_time=end_time,
+        closed_candles_only=closed_candles_only,
     )
 
     # Estimate only after the trade-plan builder decides which targets are available.

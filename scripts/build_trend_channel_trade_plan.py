@@ -37,6 +37,11 @@ def parse_arguments():
         help="Optional historical cutoff timestamp. Only candles at or before this time are used.",
     )
     parser.add_argument(
+        "--include-forming-candle",
+        action="store_true",
+        help="Allow the candle currently forming at --end-time. Default uses only fully closed candles.",
+    )
+    parser.add_argument(
         "--step-size",
         type=int,
         default=20,
@@ -279,6 +284,7 @@ def main() -> None:
         recent_window=args.recent_window,
         atr_window=args.atr_window,
         end_time=args.end_time,
+        closed_candles_only=not args.include_forming_candle,
         event_lookback=args.event_lookback,
         max_retest_candles=args.max_retest_candles,
         max_false_breakout_candles=args.max_false_breakout_candles,
@@ -298,6 +304,7 @@ def main() -> None:
     print(f"Recent window override: {args.recent_window}")
     print(f"ATR window override: {args.atr_window}")
     print(f"Analysis cutoff: {args.end_time}")
+    print(f"Closed candles only: {not args.include_forming_candle}")
 
     print_trade_plan_summary(trade_plan_df)
     print_trade_plan_levels(trade_plan_df)

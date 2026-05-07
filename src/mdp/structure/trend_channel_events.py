@@ -754,6 +754,7 @@ def analyze_trend_channel_events(
     continuation_multiplier: float = 2.0,
     minimum_rr: float = 1.50,
     end_time: str | None = None,
+    closed_candles_only: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Runs scenario analysis, then classifies sequence-aware breakout/retest events.
@@ -768,6 +769,7 @@ def analyze_trend_channel_events(
         recent_window=recent_window,
         atr_window=atr_window,
         end_time=end_time,
+        closed_candles_only=closed_candles_only,
     )
 
     if scenario_df.empty:
@@ -785,6 +787,7 @@ def analyze_trend_channel_events(
             timeframe=entry_timeframe,
             end_time=end_time,
             limit=limit,
+            closed_candles_only=closed_candles_only,
         )
     elif entry_timeframe:
         candles_df = load_market_candles(symbol=symbol, timeframe=entry_timeframe, limit=limit)

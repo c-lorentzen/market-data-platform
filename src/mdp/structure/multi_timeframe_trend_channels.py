@@ -407,6 +407,7 @@ def analyze_timeframe_channels(
     recent_window: int | None = None,
     atr_window: int | None = None,
     end_time: str | None = None,
+    closed_candles_only: bool = True,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
     """
     Runs scale-aware rolling channel analysis for one timeframe.
@@ -420,6 +421,7 @@ def analyze_timeframe_channels(
             timeframe=normalized_timeframe,
             end_time=end_time,
             limit=limit,
+            closed_candles_only=closed_candles_only,
         )
     else:
         candles_df = load_market_candles(
@@ -524,6 +526,7 @@ def analyze_multi_timeframe_channels(
     recent_window: int | None = None,
     atr_window: int | None = None,
     end_time: str | None = None,
+    closed_candles_only: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Runs scale-aware active rolling channel analysis across several timeframes.
@@ -544,6 +547,7 @@ def analyze_multi_timeframe_channels(
             recent_window=recent_window,
             atr_window=atr_window,
             end_time=end_time,
+            closed_candles_only=closed_candles_only,
         )
 
         summary_rows.append(summary)
