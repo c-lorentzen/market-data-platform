@@ -47,7 +47,9 @@ market-data-platform/
 │  ├── walk_forward_sr_bounce.py
 │  ├── generate_walk_forward_pdf_report.py
 │  ├── detect_trend_channels.py
-│  └── plot_trend_channels
+│  ├── plot_trend_channels.py
+│  ├── detect_rolling_trend_channels.py
+│  └── plot_rolling_trend_channels.py
 │
 ├─ src/
 │  └── mdp/
@@ -66,7 +68,8 @@ market-data-platform/
 │     ├── visualization/
 │     │   ├── __init__.py
 │     │   ├── price_charts.py
-│     │   └── trend_channel_charts
+│     │   ├── trend_channel_charts.py
+│     │   └── rolling_trend_channel_charts.py
 │     │
 │     ├── quality/
 │     │   ├── __init__.py
@@ -82,7 +85,8 @@ market-data-platform/
 │     │   ├── support_resistance.py
 │     │   ├── zone_validation.py
 │     │   ├── zone_context.py
-│     │   └── trend_channels.py
+│     │   ├── trend_channels.py
+│     │   └── rolling_trend_channels.py
 │     │
 │     ├── timeframes/
 │     │   ├── __init__.py
