@@ -257,18 +257,89 @@ def classify_probability_state(
     )
 
 
+def build_non_actionable_probability_row(
+    trade_plan_row: pd.Series,
+    probability_state: str,
+    notes: str,
+    probability_model_status: str,
+) -> pd.DataFrame:
+    """
+    Returns a non-actionable probability row without estimating SL/TP probabilities.
+    """
+    # Keep the trade-plan levels visible for debugging, but do not assign probabilities.
+    probability_row = TrendChannelOutcomeProbability(
+        symbol=safe_text(trade_plan_row.get("symbol")) or "",
+        timeframes=safe_text(trade_plan_row.get("timeframes")) or "",
+        probability_state=probability_state,
+        estimation_method="scale_aware_outcome_probability_proxy_v2_actionable_plan_required",
+        plan_state=safe_text(trade_plan_row.get("plan_state")),
+        plan_direction=safe_text(trade_plan_row.get("plan_direction")),
+        event_state=safe_text(trade_plan_row.get("event_state")),
+        event_quality_score=safe_float(trade_plan_row.get("event_quality_score")),
+        target_plan_state=safe_text(trade_plan_row.get("target_plan_state")),
+        available_targets=safe_text(trade_plan_row.get("available_targets")) or "none",
+        entry_price=safe_float(trade_plan_row.get("entry_price")),
+        stop_loss=safe_float(trade_plan_row.get("stop_loss")),
+        risk_points=safe_float(trade_plan_row.get("risk_points")),
+        tp1_price=safe_float(trade_plan_row.get("tp1_price")),
+        tp1_rr=safe_float(trade_plan_row.get("tp1_rr")),
+        tp1_available=bool(trade_plan_row.get("tp1_available")),
+        tp1_probability=None,
+        tp1_weight=None,
+        tp2_price=safe_float(trade_plan_row.get("tp2_price")),
+        tp2_rr=safe_float(trade_plan_row.get("tp2_rr")),
+        tp2_available=bool(trade_plan_row.get("tp2_available")),
+        tp2_probability=None,
+        tp2_weight=None,
+        tp3_price=safe_float(trade_plan_row.get("tp3_price")),
+        tp3_rr=safe_float(trade_plan_row.get("tp3_rr")),
+        tp3_available=bool(trade_plan_row.get("tp3_available")),
+        tp3_probability=None,
+        tp3_weight=None,
+        stop_loss_probability=None,
+        best_probability_target=None,
+        best_expected_value_target=None,
+        weighted_expected_r=None,
+        probability_confidence_score=0.0,
+        probability_model_status=probability_model_status,
+        notes=notes,
+    )
+
+    return pd.DataFrame([asdict(probability_row)])
+
+
 def estimate_probability_from_trade_plan(
     trade_plan_df: pd.DataFrame,
     rr_decay: float = 0.45,
     stop_bias_multiplier: float = 1.25,
 ) -> pd.DataFrame:
     """
-    Estimates SL/TP probability proxies from one scale-aware trade plan.
+    Estimates SL/TP probability proxies from one actionable scale-aware trade plan.
     """
     if trade_plan_df.empty:
         return pd.DataFrame()
 
     trade_plan_row = trade_plan_df.iloc[0]
+    plan_state = safe_text(trade_plan_row.get("plan_state")) or ""
+    available_targets = safe_text(trade_plan_row.get("available_targets")) or "none"
+
+    # Do not estimate probabilities if the event is not actionable yet.
+    if not plan_state.startswith("valid_trade_plan"):
+        return build_non_actionable_probability_row(
+            trade_plan_row=trade_plan_row,
+            probability_state="probability_not_available_no_valid_trade_plan",
+            probability_model_status="not_estimated_event_not_actionable_yet",
+            notes="No valid trade plan exists yet, so SL/TP probabilities are intentionally left blank.",
+        )
+
+    # Do not estimate probabilities when the plan has no efficient target set.
+    if available_targets == "none":
+        return build_non_actionable_probability_row(
+            trade_plan_row=trade_plan_row,
+            probability_state="probability_not_available_no_targets",
+            probability_model_status="not_estimated_no_efficient_targets",
+            notes="The trade plan exists, but no target passed the minimum RR filter.",
+        )
 
     event_quality_score = safe_float(trade_plan_row.get("event_quality_score"))
     if event_quality_score is None:
@@ -346,7 +417,7 @@ def estimate_probability_from_trade_plan(
         symbol=safe_text(trade_plan_row.get("symbol")) or "",
         timeframes=safe_text(trade_plan_row.get("timeframes")) or "",
         probability_state=probability_state,
-        estimation_method="scale_aware_outcome_probability_proxy_v1_not_historical_yet",
+        estimation_method="scale_aware_outcome_probability_proxy_v2_actionable_plan_required",
         plan_state=safe_text(trade_plan_row.get("plan_state")),
         plan_direction=safe_text(trade_plan_row.get("plan_direction")),
         event_state=safe_text(trade_plan_row.get("event_state")),
@@ -381,7 +452,6 @@ def estimate_probability_from_trade_plan(
     )
 
     return pd.DataFrame([asdict(probability_row)])
-
 
 def estimate_trend_channel_outcome_probability(
     symbol: str,
