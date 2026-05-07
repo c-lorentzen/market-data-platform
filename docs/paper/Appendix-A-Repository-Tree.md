@@ -49,8 +49,10 @@ market-data-platform/
 │  ├── detect_trend_channels.py
 │  ├── plot_trend_channels.py
 │  ├── detect_rolling_trend_channels.py
-│  └── plot_rolling_trend_channels.py
-│
+│  ├── plot_rolling_trend_channels.py
+│  ├── analyze_multi_timeframe_trend_channels.py
+│  └── analyze_market_scale.py
+│    
 ├─ src/
 │  └── mdp/
 │     ├── database/
@@ -86,7 +88,9 @@ market-data-platform/
 │     │   ├── zone_validation.py
 │     │   ├── zone_context.py
 │     │   ├── trend_channels.py
-│     │   └── rolling_trend_channels.py
+│     │   ├── rolling_trend_channels.py
+│     │   ├── multi_timeframe_trend_channels.py
+│     │   └── market_scale.py
 │     │
 │     ├── timeframes/
 │     │   ├── __init__.py
