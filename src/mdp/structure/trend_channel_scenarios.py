@@ -417,6 +417,7 @@ def analyze_trend_channel_scenario(
     active_only: bool = True,
     recent_window: int | None = None,
     atr_window: int | None = None,
+    end_time: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Runs scale-aware MTF channel analysis and creates a scenario table.
@@ -433,6 +434,7 @@ def analyze_trend_channel_scenario(
         active_only=active_only,
         recent_window=recent_window,
         atr_window=atr_window,
+        end_time=end_time,
     )
 
     scenario = classify_scale_aware_scenario(

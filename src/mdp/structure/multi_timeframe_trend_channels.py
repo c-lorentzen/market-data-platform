@@ -6,6 +6,7 @@ from typing import Any
 import pandas as pd
 
 from mdp.database.candle_loader import load_market_candles
+from mdp.database.candle_loader_asof import load_market_candles_as_of
 from mdp.structure.market_scale import MarketScaleMetrics, calculate_market_scale
 from mdp.structure.rolling_trend_channels import detect_rolling_trend_channels
 
@@ -405,6 +406,7 @@ def analyze_timeframe_channels(
     min_anchor_pivots: int = 3,
     recent_window: int | None = None,
     atr_window: int | None = None,
+    end_time: str | None = None,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
     """
     Runs scale-aware rolling channel analysis for one timeframe.
@@ -412,11 +414,19 @@ def analyze_timeframe_channels(
     normalized_timeframe = timeframe.upper()
 
     # Load this timeframe independently because each timeframe has its own market scale.
-    candles_df = load_market_candles(
-        symbol=symbol,
-        timeframe=normalized_timeframe,
-        limit=limit,
-    )
+    if end_time is not None:
+        candles_df = load_market_candles_as_of(
+            symbol=symbol,
+            timeframe=normalized_timeframe,
+            end_time=end_time,
+            limit=limit,
+        )
+    else:
+        candles_df = load_market_candles(
+            symbol=symbol,
+            timeframe=normalized_timeframe,
+            limit=limit,
+        )
 
     if candles_df.empty:
         summary = summarize_timeframe_channels(
@@ -513,6 +523,7 @@ def analyze_multi_timeframe_channels(
     active_only: bool = True,
     recent_window: int | None = None,
     atr_window: int | None = None,
+    end_time: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Runs scale-aware active rolling channel analysis across several timeframes.
@@ -532,6 +543,7 @@ def analyze_multi_timeframe_channels(
             active_only=active_only,
             recent_window=recent_window,
             atr_window=atr_window,
+            end_time=end_time,
         )
 
         summary_rows.append(summary)

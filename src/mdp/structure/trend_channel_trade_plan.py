@@ -428,6 +428,7 @@ def build_trend_channel_trade_plan(
     min_rejection_wick_ratio: float = 0.35,
     continuation_multiplier: float = 2.0,
     minimum_rr: float = 1.50,
+    end_time: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Runs event detection and converts the result into a scale-aware trade plan.
@@ -448,6 +449,7 @@ def build_trend_channel_trade_plan(
         min_rejection_wick_ratio=min_rejection_wick_ratio,
         continuation_multiplier=continuation_multiplier,
         minimum_rr=minimum_rr,
+        end_time=end_time,
     )
 
     # Build the trade plan only after the event module has created its event row.

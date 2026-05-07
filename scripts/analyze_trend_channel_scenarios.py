@@ -30,6 +30,12 @@ def parse_arguments():
         default=300,
         help="Number of candles to load per timeframe.",
     )
+
+    parser.add_argument(
+        "--end-time",
+        default=None,
+        help="Optional historical cutoff timestamp. Only candles at or before this time are used.",
+    )
     parser.add_argument(
         "--step-size",
         type=int,
@@ -244,6 +250,7 @@ def main():
         active_only=active_only,
         recent_window=args.recent_window,
         atr_window=args.atr_window,
+        end_time=args.end_time,
     )
 
     pd.set_option("display.max_columns", None)
@@ -257,6 +264,7 @@ def main():
     print(f"Active only: {active_only}")
     print(f"Recent window override: {args.recent_window}")
     print(f"ATR window override: {args.atr_window}")
+    print(f"Analysis cutoff: {args.end_time}")
 
     print_scenario_table(scenario_df)
     print_scale_levels_table(scenario_df)

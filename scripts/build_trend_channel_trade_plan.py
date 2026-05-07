@@ -30,6 +30,12 @@ def parse_arguments():
         default=300,
         help="Number of candles to load per timeframe.",
     )
+
+    parser.add_argument(
+        "--end-time",
+        default=None,
+        help="Optional historical cutoff timestamp. Only candles at or before this time are used.",
+    )
     parser.add_argument(
         "--step-size",
         type=int,
@@ -272,6 +278,7 @@ def main() -> None:
         active_only=not args.include_historical,
         recent_window=args.recent_window,
         atr_window=args.atr_window,
+        end_time=args.end_time,
         event_lookback=args.event_lookback,
         max_retest_candles=args.max_retest_candles,
         max_false_breakout_candles=args.max_false_breakout_candles,
@@ -290,6 +297,7 @@ def main() -> None:
     print(f"Minimum RR: {args.minimum_rr}")
     print(f"Recent window override: {args.recent_window}")
     print(f"ATR window override: {args.atr_window}")
+    print(f"Analysis cutoff: {args.end_time}")
 
     print_trade_plan_summary(trade_plan_df)
     print_trade_plan_levels(trade_plan_df)

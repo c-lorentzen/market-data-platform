@@ -6,6 +6,7 @@ from typing import Any
 import pandas as pd
 
 from mdp.database.candle_loader import load_market_candles
+from mdp.database.candle_loader_asof import load_market_candles_as_of
 from mdp.structure.trend_channels import prepare_channel_candles
 from mdp.structure.trend_channel_scenarios import analyze_trend_channel_scenario
 
@@ -752,6 +753,7 @@ def analyze_trend_channel_events(
     min_rejection_wick_ratio: float = 0.35,
     continuation_multiplier: float = 2.0,
     minimum_rr: float = 1.50,
+    end_time: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Runs scenario analysis, then classifies sequence-aware breakout/retest events.
@@ -765,6 +767,7 @@ def analyze_trend_channel_events(
         active_only=active_only,
         recent_window=recent_window,
         atr_window=atr_window,
+        end_time=end_time,
     )
 
     if scenario_df.empty:
@@ -776,7 +779,17 @@ def analyze_trend_channel_events(
     event_candidate = pick_event_candidate(candidates_df, entry_timeframe, event_direction)
 
     # Load entry timeframe candles because event detection belongs to the execution/refinement layer.
-    candles_df = load_market_candles(symbol=symbol, timeframe=entry_timeframe, limit=limit) if entry_timeframe else pd.DataFrame()
+    if entry_timeframe and end_time is not None:
+        candles_df = load_market_candles_as_of(
+            symbol=symbol,
+            timeframe=entry_timeframe,
+            end_time=end_time,
+            limit=limit,
+        )
+    elif entry_timeframe:
+        candles_df = load_market_candles(symbol=symbol, timeframe=entry_timeframe, limit=limit)
+    else:
+        candles_df = pd.DataFrame()
     market_df = prepare_channel_candles(candles_df) if not candles_df.empty else pd.DataFrame()
 
     base_levels = calculate_base_event_levels(
